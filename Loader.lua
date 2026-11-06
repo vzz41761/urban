@@ -1,6 +1,6 @@
 -- cobble hills loader (Urban Exploit)
--- ⚠️ Se o seu usuário do GitHub NÃO for "vzz41761", troque abaixo! ⚠️
-local baseUrl = "https://raw.githubusercontent.com/vzz41761/urban/main/"
+local baseUrl = "https://raw.githubusercontent.com/vzz41761/urban/main/" 
+-- ⚠️ MUDE O "vzz41761" SE O SEU USUÁRIO FOR OUTRO ⚠️
 
 if getgenv().Cobble_Unload then 
     pcall(getgenv().Cobble_Unload) 
@@ -8,10 +8,19 @@ end
 
 local function loadFile(name)
     local success, err = pcall(function()
-        loadstring(game:HttpGet(baseUrl .. name, true))()
+        local src = game:HttpGet(baseUrl .. name, true)
+        if not src or src == "" or src:find("404: Not Found") then
+            error("Não foi possível baixar o arquivo (link 404 ou vazio).")
+        end
+        local fn, compileErr = loadstring(src)
+        if not fn then
+            error("Erro de sintaxe no arquivo: " .. tostring(compileErr))
+        end
+        fn()
     end)
+    
     if not success then
-        warn("[cobble] Erro ao carregar " .. name .. ": " .. tostring(err))
+        warn("[cobble] Erro no " .. name .. ": " .. tostring(err))
     end
 end
 
