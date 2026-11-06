@@ -1,27 +1,27 @@
--- cobble hills loader (Urban Exploit)
-local baseUrl = "https://raw.githubusercontent.com/vzz41761/urban/main/" 
+-- cobble hills loader (Blindado)
+local baseUrl = "https://raw.githubusercontent.com/vzz41761/urban/main/"
 -- ⚠️ MUDE O "vzz41761" SE O SEU USUÁRIO FOR OUTRO ⚠️
 
-if getgenv().Cobble_Unload then 
-    pcall(getgenv().Cobble_Unload) 
-end
+if getgenv().Cobble_Unload then pcall(getgenv().Cobble_Unload) end
 
 local function loadFile(name)
-    local success, err = pcall(function()
-        local src = game:HttpGet(baseUrl .. name, true)
-        if not src or src == "" or src:find("404: Not Found") then
-            error("Não foi possível baixar o arquivo (link 404 ou vazio).")
-        end
-        local fn, compileErr = loadstring(src)
-        if not fn then
-            error("Erro de sintaxe no arquivo: " .. tostring(compileErr))
-        end
-        fn()
-    end)
+    print("[cobble] Baixando " .. name .. "...")
+    local ok, src = pcall(function() return game:HttpGet(baseUrl .. name, true) end)
     
-    if not success then
-        warn("[cobble] Erro no " .. name .. ": " .. tostring(err))
+    if not ok or not src then
+        return warn("[cobble] Erro de conexão ao baixar " .. name)
     end
+    
+    if src:find("404: Not Found") or src:find("<!DOCTYPE html>") then
+        return warn("[cobble] Arquivo " .. name .. " não encontrado no GitHub! Verifique a URL.")
+    end
+
+    local func, err = loadstring(src)
+    if not func then
+        return warn("[cobble] Erro de sintaxe no " .. name .. ": " .. tostring(err))
+    end
+    
+    pcall(func)
 end
 
 loadFile("Logic.lua")
